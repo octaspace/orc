@@ -1,0 +1,9 @@
+{
+    "image": "ubuntu:18.04",
+    "AttachStdin": true,
+    "AttachStdout": true,
+    "AttachStderr": true,
+    "Tty": true,
+    "OpenStdin": true,
+    "StdinOnce": true
+}

@@ -1,0 +1,7 @@
+{
+    "command": ["sh", "-c", "echo $x1 > /tmp/pass"],
+    "env": {
+        "x1": "foo1",
+        "x2": "foo2"
+    }
+}

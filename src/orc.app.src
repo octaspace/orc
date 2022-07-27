@@ -1,0 +1,14 @@
+{application, orc, [
+    {description, "OCTA MIDDLEWARE"},
+    {vsn, semver},
+    {applications, [
+        kernel,
+        stdlib,
+        inets,
+        jsx,
+        cowboy,
+        docker,
+        os_mon
+    ]},
+    {mod, {orc_app, []}}
+]}.
