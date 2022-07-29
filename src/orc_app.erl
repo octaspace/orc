@@ -64,7 +64,7 @@ init_http_server() ->
     PrivDir = code:priv_dir(orc),
 
     TransportOpts = [
-        {port, 47015},
+        {port, http_listen_port()},
         {certfile, filename:join([PrivDir, "octa.crt"])},
         {keyfile, filename:join([PrivDir, "octa.key"])}
     ],
@@ -101,6 +101,12 @@ init_http_server() ->
     },
 
     {ok, _} = cowboy:start_tls(https, TransportOpts, HTTPOpts).
+
+http_listen_port() ->
+    case os:getenv("ORC_PORT") of
+        false -> 47015;
+        Port -> list_to_integer(Port)
+    end.
 
 collect_docker_info() ->
     {ok, 200, Info} = docker:g(<<"/info">>),
