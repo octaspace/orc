@@ -53,7 +53,7 @@ check_is_registered() ->
     end.
 
 send_register_request(#{token := Token} = Data) ->
-    case httpc:request(register_url() ++ Token) of
+    case httpc:request(get, {register_url() ++ Token, register_headers()}, [], []) of
         {ok, {{"HTTP/1.1", 202, _OK}, _Headers, _Body}} ->
             write(Data#{is_registered => true});
         _Error ->
@@ -66,4 +66,11 @@ register_url() ->
             "https://api.octa.space/v1/hello/";
         _ ->
             os:getenv("ORC_REGISTER_URL", "http://localhost:9991/hello/")
+    end.
+
+register_headers() ->
+    case os:getenv("ORC_DOMAIN_NAME") of
+        false -> [];
+        Name ->
+            [{"X-ORC-DOMAIN-NAME", list_to_binary(Name)}]
     end.
