@@ -4,6 +4,8 @@
 -export([store/0]).
 -export([send_register_request/1]).
 
+-include_lib("kernel/include/logger.hrl").
+
 fetch() ->
     {ok, Data} = file:read_file("orc.ident"),
     binary_to_term(Data).
@@ -71,6 +73,13 @@ register_url() ->
 register_headers() ->
     case os:getenv("ORC_DOMAIN_NAME") of
         false -> [];
+        [] -> [];
         Name ->
-            [{"X-ORC-DOMAIN-NAME", list_to_binary(Name)}]
+            case inet:getaddr(Name, inet) of
+                {ok, _IP} ->
+                    [{"X-ORC-DOMAIN-NAME", list_to_binary(Name)}];
+                {error, Reason} ->
+                    ?LOG_ERROR("can't resolve X-ORC-DOMAIN-NAME, name: ~s, reason: ~p", [Name, Reason]),
+                    exit(Reason)
+            end
     end.
