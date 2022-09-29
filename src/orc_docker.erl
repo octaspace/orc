@@ -8,6 +8,15 @@
 methods() ->
     [<<"GET">>, <<"POST">>, <<"DELETE">>].
 
+handle_request(<<"GET">>, volumes_list, _Body, Req) ->
+    {ok, 200, Volumes} = docker:g(<<"/volumes">>, ?TIMEOUT),
+    {200, maps:get(<<"Volumes">>, Volumes), Req};
+
+handle_request(<<"POST">>, volumes_create, Body, Req) ->
+    Name = cowboy_req:binding(name, Req),
+    {ok, Code, Message} = docker:p(<<"/volumes/create">>, Body#{name => Name}, ?TIMEOUT),
+    {Code, Message, Req};
+
 handle_request(<<"POST">>, container_archive, #{<<"path">> := Path}, Req) ->
     Name = cowboy_req:binding(name, Req),
     case docker:g({<<"/containers/", Name/binary, "/archive">>, [{<<"path">>, Path}]}, ?TIMEOUT) of

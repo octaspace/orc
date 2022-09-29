@@ -86,7 +86,10 @@ init_http_server() ->
             {"/docker/c/:name/wait", orc_http_route, #{callback => orc_docker, route => container_wait}},
             {"/docker/c/:name/logs/:tail", orc_http_route, #{callback => orc_docker, route => container_logs}},
             {"/docker/c/:name/inspect", orc_http_route, #{callback => orc_docker, route => container_inspect}},
-            {"/docker/c/:name/archive", orc_http_route, #{callback => orc_docker, route => container_archive}}
+            {"/docker/c/:name/archive", orc_http_route, #{callback => orc_docker, route => container_archive}},
+
+            {"/docker/v", orc_http_route, #{callback => orc_docker, route => volumes_list}},
+            {"/docker/v/:name", orc_http_route, #{callback => orc_docker, route => volumes_create}}
         ]}
     ]),
 
