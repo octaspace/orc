@@ -26,6 +26,7 @@ set_common_config() ->
             "aarch64-unknown-linux-gnu" -> aarch64;
             _                           -> unknown
     end,
+    detect_linux_distro(),
     persistent_term:put({config, system_arch}, Arch),
     persistent_term:put({config, erts_version}, list_to_binary(erlang:system_info(version))),
     persistent_term:put({config, cpu_model_name}, orc_system:cpu_model_name()).
@@ -129,3 +130,9 @@ collect_docker_info() ->
     persistent_term:put({config, docker_root_dir}, maps:get(<<"DockerRootDir">>, Info)),
     persistent_term:put({config, kernel_version}, maps:get(<<"KernelVersion">>, Info)),
     persistent_term:put({config, os_version}, maps:get(<<"OperatingSystem">>, Info)).
+
+detect_linux_distro() ->
+    {0, Data} = orc_shell:exec("lsb_release -sci"),
+    [Distro, Release] = binary:split(Data, <<"\n">>, [global, trim_all]),
+    persistent_term:put({config, os_linux_distro}, string:lowercase(Distro)),
+    persistent_term:put({config, os_linux_release}, Release).

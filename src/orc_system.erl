@@ -14,6 +14,8 @@ handle_request(<<"GET">>, info, _Body, Req) ->
         uptime         => uptime(),
         version        => orc:version(),
         os_version     => orc:env(os_version),
+        linux_distro   => orc:env(os_linux_distro),
+        linux_release  => orc:env(os_linux_release),
         kernel_version => orc:env(kernel_version),
         arch           => orc:env(system_arch),
         cpu            => cpu_usage(),
