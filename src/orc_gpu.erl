@@ -52,18 +52,22 @@ parse_output("cuda-gpu-info", Data) ->
         binary:split(Data, <<"\n">>, [global, trim_all])
     );
 parse_output("clinfo --json", Data) ->
-    lists:foldl(
-        fun(#{<<"online">> := [#{<<"CL_DEVICE_VENDOR">> := <<"Advanced Micro Devices, Inc.">>} = Info]}, Acc) ->
-            #{
-                <<"CL_DEVICE_BOARD_NAME_AMD">>  := Model,
-                <<"CL_DEVICE_GLOBAL_MEM_SIZE">> := MemTotal
-            } = Info,
-            [#{
-                model        => Model,
-                mem_total_mb => MemTotal / (1024 * 1024)
-            } | Acc];
+    lists:flatten(lists:foldl(
+        fun(#{<<"online">> := Online}, Acc) ->
+            [process_amd_online_gpu(Online) | Acc];
            (_Info, Acc) -> Acc
         end,
         [],
         maps:get(<<"devices">>, jsx:decode(Data))
-    ).
+    )).
+
+process_amd_online_gpu(GPUs) -> process_amd_online_gpu(GPUs, []).
+
+process_amd_online_gpu([], Acc) -> Acc;
+process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := <<"Advanced Micro Devices, Inc.">>} = Info | Rest], Acc) ->
+    process_amd_online_gpu(Rest, [#{
+        model        => maps:get(<<"CL_DEVICE_BOARD_NAME_AMD">>, Info),
+        mem_total_mb => maps:get(<<"CL_DEVICE_GLOBAL_MEM_SIZE">>, Info)
+    } | Acc]);
+process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := _Vendor} | Rest], Acc) ->
+    process_amd_online_gpu(Rest, Acc).
