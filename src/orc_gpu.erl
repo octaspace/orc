@@ -67,7 +67,7 @@ process_amd_online_gpu([], Acc) -> Acc;
 process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := <<"Advanced Micro Devices, Inc.">>} = Info | Rest], Acc) ->
     process_amd_online_gpu(Rest, [#{
         model        => maps:get(<<"CL_DEVICE_BOARD_NAME_AMD">>, Info),
-        mem_total_mb => maps:get(<<"CL_DEVICE_GLOBAL_MEM_SIZE">>, Info)
+        mem_total_mb => maps:get(<<"CL_DEVICE_GLOBAL_MEM_SIZE">>, Info) / 1024 / 1024 %% CL_DEVICE_GLOBAL_MEM_SIZE in bytes
     } | Acc]);
 process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := _Vendor} | Rest], Acc) ->
     process_amd_online_gpu(Rest, Acc).
