@@ -10,4 +10,7 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    {ok, {{one_for_all, 0, 1}, []}}.
+    Childs = [
+        #{id => orc_vrf, start => {orc_vrf, start_link, []}}
+    ],
+    {ok, {{one_for_all, 0, 1}, Childs}}.
