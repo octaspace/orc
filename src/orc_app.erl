@@ -78,7 +78,6 @@ init_http_server() ->
             {"/system/upgrade", orc_http_route, #{callback => orc_system, route => upgrade}},
             {"/system/logs", orc_http_route, #{callback => orc_system, route => logs}},
             {"/system/vrf/start", orc_http_route, #{callback => orc_system, route => vrf_start}},
-            {"/system/vrf/stop", orc_http_route, #{callback => orc_system, route => vrf_stop}},
 
             {"/docker/c", orc_http_route, #{callback => orc_docker, route => container_list}},
             {"/docker/c/:name", orc_http_route, #{callback => orc_docker, route => container}},

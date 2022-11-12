@@ -27,6 +27,9 @@ handle_request(<<"GET">>, info, _Body, Req) ->
     },
     {200, Response, Req};
 
+handle_request(<<"POST">>, vrf_start, Body, Req) ->
+    {200, orc_vrf:start(Body), Req};
+
 handle_request(<<"POST">>, shell, #{<<"command">> := Command} = _Body, Req) ->
     {Status, Output} = orc_shell:exec(Command),
     Reply = #{
