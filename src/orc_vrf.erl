@@ -5,7 +5,6 @@
 %% API
 -export([start_link/0]).
 -export([start/1]).
--export([stop/0]).
 
 %% gen_server callbacks
 -export([init/1]).
@@ -30,9 +29,6 @@ start_link() ->
 start(Rules) ->
     gen_server:call(?MODULE, {start, Rules}).
 
-stop() ->
-    gen_server:call(?MODULE, stop).
-
 init([]) ->
     {ok, #state{}}.
 
@@ -42,11 +38,7 @@ handle_call({start, Rules}, _From, State) ->
     ?LOG_INFO("verification start, rules: ~p", [Rules]),
     lists:foreach(fun tcp_server/1, maps:get(<<"open_tcp_ports">>, Rules, [])),
     lists:foreach(fun udp_server/1, maps:get(<<"open_udp_ports">>, Rules, [])),
-    {reply, ok, State#state{rules = Rules}};
-
-handle_call(stop, _From, State) ->
-    ?LOG_INFO("verification stop"),
-    {reply, ok, State}.
+    {reply, ok, State#state{rules = Rules}}.
 
 terminate(_Reason, _State) -> ok.
 
