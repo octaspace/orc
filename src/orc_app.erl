@@ -39,7 +39,7 @@ init_logger() ->
             max_no_files       => 10,
             max_no_bytes       => 10485760,
             sync_mode_qlen     => 1000,
-            drop_mode_qlen     => 1000,
+            drop_mode_qlen     => 2000,
             flush_qlen         => 2000,
             burst_limit_enable => false
         },

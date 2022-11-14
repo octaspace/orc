@@ -48,25 +48,29 @@ tcp_server(Port) ->
             ?LOG_INFO("TCP port ~p is open", [Port]),
             spawn(fun() -> ping_pong_tcp(Socket, Port) end);
         {error, Reason} ->
-            ?LOG_ERROR("can't open TCP port: ~p, reason: ~p", [Port, Reason]),
-            throw(Reason)
+            ?LOG_ERROR("can't open TCP port: ~p, reason: ~p", [Port, Reason])
     end.
 
 udp_server(Port) ->
     spawn(fun() -> ping_pong_udp(Port) end).
 
 ping_pong_tcp(LSocket, Port) ->
-    {ok, Socket} = gen_tcp:accept(LSocket),
-    receive
-        {tcp, Socket, <<"ping">>} ->
-            ?LOG_INFO("receive ping, proto: tcp, port: ~p", [Port]),
-            gen_tcp:send(Socket, <<"pong">>);
-        _ -> ok
-    after 60000 ->
-        ?LOG_ERROR("TCP ping timeout, port: ~p", [Port])
-    end,
-    gen_tcp:close(Socket),
-    gen_tcp:close(LSocket).
+    case gen_tcp:accept(LSocket) of
+        {ok, Socket} ->
+            receive
+                {tcp, Socket, <<"ping">>} ->
+                    ?LOG_INFO("receive ping, proto: tcp, port: ~p", [Port]),
+                    gen_tcp:send(Socket, <<"pong">>);
+                _ -> ok
+            after 60000 ->
+                ?LOG_ERROR("TCP ping timeout, port: ~p", [Port])
+            end,
+            gen_tcp:close(Socket),
+            gen_tcp:close(LSocket);
+        {error, Reason} ->
+            ?LOG_ERROR("can't accept TCP connection, port: ~p, reason: ~p", [Port, Reason]),
+            gen_tcp:close(LSocket)
+    end.
 
 ping_pong_udp(Port) ->
     case gen_udp:open(Port, [binary]) of
@@ -82,6 +86,5 @@ ping_pong_udp(Port) ->
             end,
             gen_udp:close(Socket);
         {error, Reason} ->
-            ?LOG_ERROR("can't open UDP port: ~p, reason: ~p", [Port, Reason]),
-            throw(Reason)
+            ?LOG_ERROR("can't open UDP port: ~p, reason: ~p", [Port, Reason])
     end.
