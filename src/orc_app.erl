@@ -43,7 +43,7 @@ init_logger() ->
             flush_qlen         => 2000,
             burst_limit_enable => false
         },
-        formatter => {logger_formatter, #{template => [time, " ", msg, "\n"], single_line => true}}
+        formatter => {logger_formatter, #{template => [time, " ", mfa, ":", line, " ", msg, "\n"], single_line => true}}
     },
     case os:getenv("ORC_DEBUG") of
         false ->
