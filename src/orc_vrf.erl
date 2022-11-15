@@ -36,33 +36,39 @@ handle_cast(_Msg, State) -> {noreply, State}.
 
 handle_call({start, Rules}, _From, State) ->
     ?LOG_INFO("verification start, rules: ~p", [Rules]),
-    lists:foreach(fun tcp_server/1, maps:get(<<"open_tcp_ports">>, Rules, [])),
-    lists:foreach(fun udp_server/1, maps:get(<<"open_udp_ports">>, Rules, [])),
+    start_tcp_servers(Rules),
+    start_udp_servers(Rules),
     {reply, ok, State#state{rules = Rules}}.
 
 terminate(_Reason, _State) -> ok.
 
-tcp_server(Port) ->
+start_tcp_servers(#{<<"open_tcp_ports">> := Ports, <<"timeout">> := Timeout}) ->
+    lists:foreach(fun(Port) -> tcp_server(Port, Timeout) end, Ports).
+
+start_udp_servers(#{<<"open_udp_ports">> := Ports, <<"timeout">> := Timeout}) ->
+    lists:foreach(fun(Port) -> udp_server(Port, Timeout) end, Ports).
+
+tcp_server(Port, Timeout) ->
     case gen_tcp:listen(Port, [binary, {reuseaddr, true}]) of
         {ok, Socket} ->
             ?LOG_INFO("TCP port ~p is open", [Port]),
-            spawn(fun() -> ping_pong_tcp(Socket, Port) end);
+            spawn(fun() -> ping_pong_tcp(Socket, Port, Timeout) end);
         {error, Reason} ->
             ?LOG_ERROR("can't open TCP port: ~p, reason: ~p", [Port, Reason])
     end.
 
-udp_server(Port) ->
-    spawn(fun() -> ping_pong_udp(Port) end).
+udp_server(Port, Timeout) ->
+    spawn(fun() -> ping_pong_udp(Port, Timeout) end).
 
-ping_pong_tcp(LSocket, Port) ->
-    case gen_tcp:accept(LSocket, 60000) of
+ping_pong_tcp(LSocket, Port, Timeout) ->
+    case gen_tcp:accept(LSocket, Timeout) of
         {ok, Socket} ->
             receive
                 {tcp, Socket, <<"ping">>} ->
                     ?LOG_INFO("receive ping, proto: tcp, port: ~p", [Port]),
                     gen_tcp:send(Socket, <<"pong">>);
                 _ -> ok
-            after 60000 ->
+            after Timeout ->
                 ?LOG_ERROR("TCP ping timeout, port: ~p", [Port])
             end,
             gen_tcp:close(Socket),
@@ -72,7 +78,7 @@ ping_pong_tcp(LSocket, Port) ->
             gen_tcp:close(LSocket)
     end.
 
-ping_pong_udp(Port) ->
+ping_pong_udp(Port, Timeout) ->
     case gen_udp:open(Port, [binary]) of
         {ok, Socket} ->
             ?LOG_INFO("UDP port ~p is open", [Port]),
@@ -81,7 +87,7 @@ ping_pong_udp(Port) ->
                     ?LOG_INFO("receive ping, proto: udp, port: ~p", [Port]),
                     gen_udp:send(Socket, Peer, PeerPort, <<"pong">>);
                 _ -> ok
-            after 60000 ->
+            after Timeout ->
                 ?LOG_ERROR("UDP ping timeout, port: ~p", [Port])
             end,
             gen_udp:close(Socket);
