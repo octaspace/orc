@@ -55,7 +55,7 @@ udp_server(Port) ->
     spawn(fun() -> ping_pong_udp(Port) end).
 
 ping_pong_tcp(LSocket, Port) ->
-    case gen_tcp:accept(LSocket) of
+    case gen_tcp:accept(LSocket, 60000) of
         {ok, Socket} ->
             receive
                 {tcp, Socket, <<"ping">>} ->
