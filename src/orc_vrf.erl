@@ -15,8 +15,9 @@
 -include_lib("kernel/include/logger.hrl").
 
 -type rules() :: #{
-    open_tcp_ports => [inet:port_number()],
-    open_udp_ports => [inet:port_number()]
+    open_tcp_ports := [inet:port_number()],
+    open_udp_ports := [inet:port_number()],
+    timeout        := timeout()
 }.
 
 -export_type([rules/0]).
