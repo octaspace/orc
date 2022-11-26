@@ -3,6 +3,7 @@
 -export([fetch/0]).
 -export([store/0]).
 -export([send_register_request/1]).
+-export([update_data/0]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -28,6 +29,8 @@ store() ->
             },
             send_register_request(NewData)
     end.
+
+update_data() -> write(data()).
 
 data() ->
     case httpc:request("https://ifconfig.co/json") of
