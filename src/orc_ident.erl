@@ -30,7 +30,9 @@ store() ->
             send_register_request(NewData)
     end.
 
-update_data() -> write(data()).
+update_data() ->
+    Data = fetch(),
+    write(Data#{data => data()}).
 
 data() ->
     case httpc:request("https://ifconfig.co/json") of
