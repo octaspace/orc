@@ -4,6 +4,7 @@
 -export([env/1]).
 -export([env/2]).
 -export([to_binary/1]).
+-export([to_number/1]).
 
 version() ->
     Version = lists:keyfind(orc, 1, application:which_applications()),
@@ -16,4 +17,13 @@ env(Option, Default) ->
     persistent_term:get({config, Option}, Default).
 
 to_binary(Value) when is_binary(Value) -> Value;
-to_binary(Value) when is_integer(Value) -> integer_to_binary(Value).
+to_binary(Value) when is_integer(Value) -> integer_to_binary(Value);
+to_binary(Value) when is_float(Value) -> float_to_binary(Value).
+
+to_number(Value) when is_binary(Value) ->
+    try
+        binary_to_integer(Value)
+    catch
+        _:_Reason:_Stack -> %% probably value is float
+            binary_to_float(Value)
+    end.

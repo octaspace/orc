@@ -1,6 +1,7 @@
 -module(orc_gpu).
 
 -export([info/1]).
+-export([parse_output/2]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -14,8 +15,10 @@ gpu_info(FileName) ->
             try
                 parse_output(FileName, Data)
             catch
-                _:Reason:_Stack ->
-                    ?LOG_ERROR("can'g parse output, cmd: ~s, reason: ~p", [ExecPath, Reason]),
+                _:Reason:Stack ->
+                    ?LOG_ERROR("can'g parse output: ~p, cmd: ~s, reason: ~p, stack: ~p", [
+                        Data, ExecPath, Reason, Stack
+                    ]),
                     []
             end;
         Error ->
@@ -40,12 +43,12 @@ parse_output("cuda-gpu-info", Data) ->
             ] = binary:split(Info, <<",">>, [trim_all, global]),
             [#{
                 model             => Model,
-                cuda_cores        => binary_to_integer(CudaCores),
-                gpu_clock_mhz     => binary_to_integer(GPUClock),
-                mem_clock_mhz     => binary_to_integer(MemClock),
-                mem_total_mb      => binary_to_integer(MemTotal),
-                mem_free_mb       => binary_to_integer(MemFree),
-                mem_bandwidth_gbs => binary_to_float(MemBandwidth)
+                cuda_cores        => orc:to_number(CudaCores),
+                gpu_clock_mhz     => orc:to_number(GPUClock),
+                mem_clock_mhz     => orc:to_number(MemClock),
+                mem_total_mb      => orc:to_number(MemTotal),
+                mem_free_mb       => orc:to_number(MemFree),
+                mem_bandwidth_gbs => orc:to_number(MemBandwidth)
             } | Acc]
         end,
         [],
