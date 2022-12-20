@@ -9,21 +9,23 @@ methods() ->
     [<<"GET">>, <<"POST">>].
 
 handle_request(<<"GET">>, info, _Body, Req) ->
+    CPUUsage = cpu_usage(),
     Response = #{
-        erts           => orc:env(erts_version),
-        uptime         => uptime(),
-        version        => orc:version(),
-        os_version     => orc:env(os_version),
-        linux_distro   => orc:env(os_linux_distro),
-        linux_release  => orc:env(os_linux_release),
-        kernel_version => orc:env(kernel_version),
-        arch           => orc:env(system_arch),
-        cpu            => cpu_usage(),
-        cpu_model_name => orc:env(cpu_model_name),
-        gpu            => gpu_info(),
-        memory         => memory_usage(),
-        disk           => disk_usage(),
-        location       => maps:get(data, orc_ident:fetch())
+        erts             => orc:env(erts_version),
+        uptime           => uptime(),
+        version          => orc:version(),
+        os_version       => orc:env(os_version),
+        linux_distro     => orc:env(os_linux_distro),
+        linux_release    => orc:env(os_linux_release),
+        kernel_version   => orc:env(kernel_version),
+        arch             => orc:env(system_arch),
+        cpu              => CPUUsage,
+        cpu_load_percent => cpu_load_percent(CPUUsage),
+        cpu_model_name   => orc:env(cpu_model_name),
+        gpu              => gpu_info(),
+        memory           => memory_usage(),
+        disk             => disk_usage(),
+        location         => maps:get(data, orc_ident:fetch())
     },
     {200, Response, Req};
 
@@ -95,7 +97,7 @@ cpu_usage() ->
                 idle   => Idle
             } | Acc]
         end,
-    lists:foldl(Analyze, [], cpu_sup:util([detailed, per_cpu])).
+    lists:foldl(Analyze, [], orc_sysmon:cpu_usage()).
 
 memory_usage() ->
     maps:from_list(memsup:get_system_memory_data()).
@@ -131,3 +133,12 @@ gpu_info() ->
         nvidia => orc_cache:get_or_set(gpu_info_nvidia, fun() -> orc_gpu:info(nvidia) end),
         amd    => orc_cache:get_or_set(gpu_info_amd, fun() -> orc_gpu:info(amd) end)
     }.
+
+cpu_load_percent(Usage) ->
+    Total =
+        lists:foldl(
+            fun(#{idle := Idle}, Acc) -> Acc + Idle end,
+            0,
+            Usage
+        ),
+    100 - (Total / length(Usage)).

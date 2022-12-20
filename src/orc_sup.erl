@@ -12,5 +12,6 @@ start_link() ->
 init([]) ->
     Childs = [
         #{id => orc_vrf, start => {orc_vrf, start_link, []}}
+        #{id => orc_sysmon, start => {orc_sysmon, start_link, []}}
     ],
     {ok, {{one_for_all, 0, 1}, Childs}}.
