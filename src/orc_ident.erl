@@ -35,7 +35,7 @@ update_data() ->
     write(Data#{data => data()}).
 
 data() ->
-    case httpc:request("https://ifconfig.co/json") of
+    case httpc:request("https://ifconfig.octa.space/json") of
         {ok, {{"HTTP/1.1", 200, _OK}, _Headers, Body}} ->
             maps:with([
                 <<"ip">>,
