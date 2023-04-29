@@ -77,6 +77,11 @@ handle_request(<<"GET">>, container_stop, _Body, Req) ->
     {ok, Code, Message} = docker:p(<<"/containers/", Name/binary, "/stop">>, #{}, ?TIMEOUT),
     {Code, Message, Req};
 
+handle_request(<<"GET">>, container_kill, _Body, Req) ->
+    Name = cowboy_req:binding(name, Req),
+    {ok, Code, Message} = docker:p(<<"/containers/", Name/binary, "/kill">>, #{}, ?TIMEOUT),
+    {Code, Message, Req};
+
 handle_request(<<"GET">>, container_stat, _Body, Req) ->
     Name = cowboy_req:binding(name, Req),
     {ok, Code, Message} = docker:g(

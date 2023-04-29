@@ -84,6 +84,7 @@ init_http_server() ->
             {"/docker/c/:name", orc_http_route, #{callback => orc_docker, route => container}},
             {"/docker/c/:name/start", orc_http_route, #{callback => orc_docker, route => container_start}},
             {"/docker/c/:name/stop", orc_http_route, #{callback => orc_docker, route => container_stop}},
+            {"/docker/c/:name/kill", orc_http_route, #{callback => orc_docker, route => container_kill}},
             {"/docker/c/:name/exec", orc_http_route, #{callback => orc_docker, route => container_exec}},
             {"/docker/c/:name/stat", orc_http_route, #{callback => orc_docker, route => container_stat}},
             {"/docker/c/:name/wait", orc_http_route, #{callback => orc_docker, route => container_wait}},
