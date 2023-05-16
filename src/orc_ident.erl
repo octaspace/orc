@@ -14,6 +14,7 @@ fetch() ->
 store() ->
     case filelib:is_file("orc.ident") of
         true ->
+            update_data(),
             check_is_registered();
         false ->
             Data = data(),
