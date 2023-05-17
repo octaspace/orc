@@ -19,6 +19,7 @@ handle_request(<<"GET">>, info, _Body, Req) ->
         linux_release    => orc:env(os_linux_release),
         kernel_version   => orc:env(kernel_version),
         is_hive_os       => orc:env(is_hive_os),
+        is_wsl           => orc:env(is_wsl),
         arch             => orc:env(system_arch),
         cpu              => CPUUsage,
         cpu_load_percent => cpu_load_percent(CPUUsage),

@@ -138,4 +138,7 @@ detect_linux_distro() ->
     {0, Data} = orc_shell:exec("lsb_release -sci"),
     [Distro, Release] = binary:split(Data, <<"\n">>, [global, trim_all]),
     persistent_term:put({config, os_linux_distro}, string:lowercase(Distro)),
-    persistent_term:put({config, os_linux_release}, Release).
+    persistent_term:put({config, os_linux_release}, Release),
+
+    {0, Kernel} = orc_shell:exec("uname -r"),
+    persistent_term:put({config, is_wsl}, binary:part(Kernel, {byte_size(Kernel), -4}) =:= <<"WSL2">>).
