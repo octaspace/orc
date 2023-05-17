@@ -5,7 +5,10 @@
 
 -include_lib("kernel/include/logger.hrl").
 
-info(nvidia) -> gpu_info("cuda-gpu-info");
+info(nvidia) ->
+    Args = "--query-gpu=name,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,display_mode,display_active,fan.speed,power.limit --format=csv,nounits,noheader",
+    gpu_info(lookup_nvidia_smi() ++ " " ++ Args);
+
 info(amd) -> gpu_info("clinfo --json").
 
 gpu_info(FileName) ->
@@ -31,24 +34,35 @@ parse_output("cuda-gpu-info", Data) ->
         fun(Info, Acc) ->
             [
                 Model,
-                _CC,
-                _MultiCPUs,
-                CudaCores,
-                _CCThreads,
-                GPUClock,
-                MemClock,
-                MemBandwidth,
+                DriverVersion,
+                PState,
+                PCIELinkMax,
+                PCIELinkCurrent,
+                TempGPU,
+                UtilizationGPU,
+                UtilizationMem,
                 MemTotal,
-                MemFree
-            ] = binary:split(Info, <<",">>, [trim_all, global]),
+                MemFree,
+                DisplayMode,
+                DisplayActive,
+                FanSpeed,
+                PowerLimit
+            ] = binary:split(Info, <<", ">>, [trim_all, global]),
             [#{
                 model             => Model,
-                cuda_cores        => orc:to_number(CudaCores),
-                gpu_clock_mhz     => orc:to_number(GPUClock),
-                mem_clock_mhz     => orc:to_number(MemClock),
+                driver_version    => DriverVersion,
+                pstate            => PState,
+                pcie_link_max     => orc:to_number(PCIELinkMax),
+                pcie_link_current => orc:to_number(PCIELinkCurrent),
+                gpu_temperature   => orc:to_number(TempGPU),
+                gpu_utilization   => orc:to_number(UtilizationGPU),
+                mem_utilization   => orc:to_number(UtilizationMem),
                 mem_total_mb      => orc:to_number(MemTotal),
                 mem_free_mb       => orc:to_number(MemFree),
-                mem_bandwidth_gbs => orc:to_number(MemBandwidth)
+                display_mode      => DisplayMode,
+                display_active    => DisplayActive,
+                fan_speed         => orc:to_number(FanSpeed),
+                power_limit_watt  => orc:to_number(PowerLimit)
             } | Acc]
         end,
         [],
@@ -74,3 +88,11 @@ process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := <<"Advanced Micro Devices, I
     } | Acc]);
 process_amd_online_gpu([#{<<"CL_DEVICE_VENDOR">> := _Vendor} | Rest], Acc) ->
     process_amd_online_gpu(Rest, Acc).
+
+lookup_nvidia_smi() ->
+    case orc:env(is_wsl) of
+        true ->
+            "/usr/lib/wsl/lib/nvidia-smi";
+        false ->
+            "nvidia-smi"
+    end.
