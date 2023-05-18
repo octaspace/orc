@@ -141,4 +141,4 @@ detect_linux_distro() ->
     persistent_term:put({config, os_linux_release}, Release),
 
     {0, Kernel} = orc_shell:exec("uname -r"),
-    persistent_term:put({config, is_wsl}, binary:part(Kernel, {byte_size(Kernel), -4}) =:= <<"WSL2">>).
+    persistent_term:put({config, is_wsl}, binary:part(string:trim(Kernel), {byte_size(string:trim(Kernel)), -4}) =:= <<"WSL2">>).
