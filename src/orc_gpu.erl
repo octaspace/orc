@@ -7,29 +7,28 @@
 
 info(nvidia) ->
     Args = "--query-gpu=name,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,display_mode,display_active,fan.speed,power.limit --format=csv,nounits,noheader",
-    gpu_info(lookup_nvidia_smi() ++ " " ++ Args);
+    gpu_info(lookup_nvidia_smi() ++ " " ++ Args, nvidia);
 
-info(amd) -> gpu_info("clinfo --json").
+info(amd) -> gpu_info("clinfo --json", amd).
 
-gpu_info(FileName) ->
-    ExecPath = filename:join([orc:env(cwd), FileName]),
-    case orc_shell:exec(ExecPath) of
+gpu_info(Cmd, GPU) ->
+    case orc_shell:exec(Cmd) of
         {0, Data} ->
             try
-                parse_output(FileName, Data)
+                parse_output(Data, GPU)
             catch
                 _:Reason:Stack ->
                     ?LOG_ERROR("can'g parse output: ~p, cmd: ~s, reason: ~p, stack: ~p", [
-                        Data, ExecPath, Reason, Stack
+                        Data, Cmd, Reason, Stack
                     ]),
                     []
             end;
         Error ->
-            ?LOG_ERROR("can't get GPU info, exec_path: ~s, error: ~p", [ExecPath, Error]),
+            ?LOG_ERROR("can't get GPU info, exec_path: ~s, error: ~p", [Cmd, Error]),
             []
     end.
 
-parse_output("cuda-gpu-info", Data) ->
+parse_output(Data, nvidia) ->
     lists:foldl(
         fun(Info, Acc) ->
             [
@@ -68,7 +67,7 @@ parse_output("cuda-gpu-info", Data) ->
         [],
         binary:split(Data, <<"\n">>, [global, trim_all])
     );
-parse_output("clinfo --json", Data) ->
+parse_output(Data, amd) ->
     lists:flatten(lists:foldl(
         fun(#{<<"online">> := Online}, Acc) ->
             [process_amd_online_gpu(Online) | Acc];
@@ -94,5 +93,5 @@ lookup_nvidia_smi() ->
         true ->
             "/usr/lib/wsl/lib/nvidia-smi";
         false ->
-            "nvidia-smi"
+            "/usr/bin/nvidia-smi"
     end.
