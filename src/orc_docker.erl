@@ -8,6 +8,14 @@
 methods() ->
     [<<"GET">>, <<"POST">>, <<"DELETE">>].
 
+handle_request(<<"GET">>, images, _Body, Req) ->
+    {ok, 200, Images} = docker:g(<<"/images/json">>, ?TIMEOUT),
+    {200, Images, Req};
+
+handle_request(<<"POST">>, images, #{<<"image">> := Image}, Req) ->
+    {ok, Code, Message} = docker:p({<<"/images/create">>, [{<<"fromImage">>, Image}]}, #{}, ?TIMEOUT),
+    {Code, Message, Req};
+
 handle_request(<<"GET">>, volumes_list, _Body, Req) ->
     {ok, 200, Volumes} = docker:g(<<"/volumes">>, ?TIMEOUT),
     {200, maps:get(<<"Volumes">>, Volumes), Req};
