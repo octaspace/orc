@@ -29,8 +29,7 @@ set_common_config() ->
     detect_linux_distro(),
     persistent_term:put({config, system_arch}, Arch),
     persistent_term:put({config, erts_version}, list_to_binary(erlang:system_info(version))),
-    persistent_term:put({config, cpu_model_name}, orc_system:cpu_model_name()),
-    persistent_term:put({config, is_hive_os}, filelib:is_regular("/etc/hiveos-release")).
+    persistent_term:put({config, cpu_model_name}, orc_system:cpu_model_name()).
 
 init_logger() ->
     Config = #{
@@ -144,4 +143,10 @@ detect_linux_distro() ->
     persistent_term:put({config, os_linux_release}, Release),
 
     {0, Kernel} = orc_shell:exec("uname -r"),
-    persistent_term:put({config, is_wsl}, binary:part(string:trim(Kernel), {byte_size(string:trim(Kernel)), -4}) =:= <<"WSL2">>).
+    NewKernel = string:trim(Kernel),
+
+    persistent_term:put({config, is_wsl}, binary:part(NewKernel, {byte_size(NewKernel), -4}) =:= <<"WSL2">>),
+    persistent_term:put(
+        {config, is_hive_os},
+        (binary:part(NewKernel, {byte_size(NewKernel), -6}) =:= <<"hiveos">> orelse filelib:is_regular("/etc/hiveos-release"))
+    ).
