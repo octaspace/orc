@@ -92,7 +92,6 @@ init_http_server() ->
             {"/docker/c/:name/archive", orc_http_route, #{callback => orc_docker, route => container_archive}},
 
             {"/docker/i", orc_http_route, #{callback => orc_docker, route => images}},
-            {"/docker/i", orc_http_route, #{callback => orc_docker, route => images}},
 
             {"/docker/v", orc_http_route, #{callback => orc_docker, route => volumes_list}},
             {"/docker/v/:name", orc_http_route, #{callback => orc_docker, route => volumes_create}}
