@@ -20,6 +20,10 @@ to_binary(Value) when is_binary(Value) -> Value;
 to_binary(Value) when is_integer(Value) -> integer_to_binary(Value);
 to_binary(Value) when is_float(Value) -> float_to_binary(Value).
 
+%% for some parameters like fan speed and power limit
+%% nvidia-smi reported [N/A] value
+to_number(<<"[N/A]">>) -> 0;
+
 to_number(Value) when is_binary(Value) ->
     try
         binary_to_integer(Value)
