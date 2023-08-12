@@ -17,7 +17,7 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: '24'
-          rebar3-version: '3.16.1'
+          #rebar3-version: '3.16.1'
       - run: |
           rebar3 as prod release
           strip _build/prod/rel/orc/erts-*/bin/* || true
@@ -35,12 +35,12 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: '24'
-          rebar3-version: '3.16.1'
+          #rebar3-version: '3.16.1'
       - run: |
           rebar3 as prod release
           strip _build/prod/rel/orc/erts-*/bin/* || true
-          tar jcf orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2 -C _build/prod/rel/ orc
-          md5sum orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2 | cut -f1 -d ' ' > orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.md5sum
+          tar jcf orc-${GITHUB_REF_NAME#v}-ubuntu-focal-x86_64.tar.bz2 -C _build/prod/rel/ orc
+          md5sum orc-${GITHUB_REF_NAME#v}-ubuntu-focal-x86_64.tar.bz2 | cut -f1 -d ' ' > orc-${GITHUB_REF_NAME#v}-ubuntu-focal-x86_64.md5sum
 
   release:
     runs-on: self-hosted
