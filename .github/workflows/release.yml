@@ -43,6 +43,7 @@ jobs:
           md5sum orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2 | cut -f1 -d ' ' > orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.md5sum
 
   release:
+    runs-on: self-hosted
     needs: ['ubuntu22-amd64', 'ubuntu20-amd64']
     steps:
       - uses: softprops/action-gh-release@v1
