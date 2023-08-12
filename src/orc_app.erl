@@ -29,7 +29,8 @@ set_common_config() ->
     detect_linux_distro(),
     persistent_term:put({config, system_arch}, Arch),
     persistent_term:put({config, erts_version}, list_to_binary(erlang:system_info(version))),
-    persistent_term:put({config, cpu_model_name}, orc_system:cpu_model_name()).
+    persistent_term:put({config, cpu_model_name}, orc_system:cpu_model_name()),
+    persistent_term:put({config, cuda_version}, orc_gpu:cuda_version()).
 
 init_logger() ->
     Config = #{

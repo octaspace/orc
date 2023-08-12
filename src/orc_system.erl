@@ -25,6 +25,7 @@ handle_request(<<"GET">>, info, _Body, Req) ->
         cpu_load_percent => cpu_load_percent(CPUUsage),
         cpu_model_name   => orc:env(cpu_model_name),
         gpu              => gpu_info(),
+        cuda_version     => orc:env(cuda_version),
         memory           => memory_usage(),
         disk             => disk_usage(),
         location         => maps:get(data, orc_ident:fetch())

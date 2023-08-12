@@ -2,6 +2,7 @@
 
 -export([info/1]).
 -export([parse_output/2]).
+-export([cuda_version/0]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -10,6 +11,13 @@ info(nvidia) ->
     gpu_info(lookup_nvidia_smi() ++ " " ++ Args, nvidia);
 
 info(amd) -> gpu_info("clinfo --json", amd).
+
+cuda_version() ->
+    case orc_shell:exec("./cuda-version") of
+        {0, Version} ->
+            string:trim(Version);
+        _ -> <<"0">>
+    end.
 
 gpu_info(Cmd, GPU) ->
     case orc_shell:exec(Cmd) of
