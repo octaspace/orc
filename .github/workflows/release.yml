@@ -23,10 +23,12 @@ jobs:
           strip _build/prod/rel/orc/erts-*/bin/* || true
           tar jcf orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2 -C _build/prod/rel/ orc
           md5sum orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2 | cut -f1 -d ' ' > orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.md5sum
+          pwd
+          ls -al
 
-      - name: release
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v1
         with:
           files: |
+            orc-*
             orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.tar.bz2
             orc-${GITHUB_REF_NAME#v}-ubuntu-jammy-x86_64.md5sum
