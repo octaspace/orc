@@ -7,7 +7,7 @@
 -include_lib("kernel/include/logger.hrl").
 
 info(nvidia) ->
-    Args = "--query-gpu=name,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,display_mode,display_active,fan.speed,power.limit --format=csv,nounits,noheader",
+    Args = "--query-gpu=index,name,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,display_mode,display_active,fan.speed,power.limit --format=csv,nounits,noheader",
     gpu_info(lookup_nvidia_smi() ++ " " ++ Args, nvidia);
 
 info(amd) -> gpu_info("clinfo --json", amd).
@@ -40,6 +40,7 @@ parse_output(Data, nvidia) ->
     lists:foldl(
         fun(Info, Acc) ->
             [
+                Idx,
                 Model,
                 DriverVersion,
                 PState,
@@ -56,6 +57,7 @@ parse_output(Data, nvidia) ->
                 PowerLimit
             ] = binary:split(Info, <<", ">>, [trim_all, global]),
             [#{
+                idx               => orc:to_number(Idx),
                 model             => Model,
                 driver_version    => DriverVersion,
                 pstate            => PState,
