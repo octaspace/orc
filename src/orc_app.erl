@@ -91,6 +91,7 @@ init_http_server() ->
             {"/docker/c/:name/logs/:tail", orc_http_route, #{callback => orc_docker, route => container_logs}},
             {"/docker/c/:name/inspect", orc_http_route, #{callback => orc_docker, route => container_inspect}},
             {"/docker/c/:name/archive", orc_http_route, #{callback => orc_docker, route => container_archive}},
+            {"/docker/c/:name/upload", orc_http_route, #{callback => orc_docker, route => container_upload}},
 
             {"/docker/i", orc_http_route, #{callback => orc_docker, route => images}},
 

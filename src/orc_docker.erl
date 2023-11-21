@@ -34,6 +34,15 @@ handle_request(<<"POST">>, container_archive, #{<<"path">> := Path}, Req) ->
             {Code, Data, Req}
     end;
 
+handle_request(<<"POST">>, container_upload, #{<<"path">> := Path, <<"data">> := Data}, Req) ->
+    Name = cowboy_req:binding(name, Req),
+    case docker:put({<<"/containers/", Name/binary, "/archive">>, [{<<"path">>, Path}]}, base64:decode(Data)) of
+        {ok, 200, <<>>} ->
+            {200, <<>>, Req};
+        {ok, Code, Message} ->
+            {Code, Message, Req}
+    end;
+
 handle_request(<<"GET">>, container_inspect, _Body, Req) ->
     Name = cowboy_req:binding(name, Req),
     {ok, Code, Message} = docker:g(<<"/containers/", Name/binary, "/json">>, ?TIMEOUT),
