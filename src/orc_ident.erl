@@ -3,7 +3,6 @@
 -export([fetch/0]).
 -export([store/0]).
 -export([send_register_request/1]).
--export([update_data/0]).
 
 -include_lib("kernel/include/logger.hrl").
 
@@ -14,40 +13,17 @@ fetch() ->
 store() ->
     case filelib:is_file("orc.ident") of
         true ->
-            update_data(),
             check_is_registered();
         false ->
-            Data = data(),
             Token = crypto:hash(sha256, [
-                maps:get(<<"ip">>, Data),
                 integer_to_binary(erlang:system_time(millisecond)),
                 crypto:strong_rand_bytes(256)
             ]),
-            NewData = #{
+            Data = #{
                 token         => string:lowercase(binary:encode_hex(Token)),
-                data          => Data,
                 is_registered => false
             },
-            send_register_request(NewData)
-    end.
-
-update_data() ->
-    Data = fetch(),
-    write(Data#{data => data()}).
-
-data() ->
-    case httpc:request("https://ifconfig.octa.space/json") of
-        {ok, {{"HTTP/1.1", 200, _OK}, _Headers, Body}} ->
-            maps:with([
-                <<"ip">>,
-                <<"country">>,
-                <<"country_iso">>,
-                <<"city">>,
-                <<"hostname">>,
-                <<"latitude">>,
-                <<"longitude">>
-            ], jsx:decode(list_to_binary(Body)));
-        Error -> exit(Error)
+            send_register_request(Data)
     end.
 
 write(Data) ->
