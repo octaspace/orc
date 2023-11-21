@@ -110,6 +110,10 @@ access_log(Req, Body, Status) ->
         Method,
         Path,
         Status,
-        Body,
+        truncate_body(Body),
         QS
     ]).
+
+truncate_body(Body) when is_binary(Body), byte_size(Body) >= 8192 ->
+    <<(binary:part(Body, 0, 8192))/binary, "...">>;
+truncate_body(Body) -> Body.
