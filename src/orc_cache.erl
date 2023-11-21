@@ -8,7 +8,7 @@
 -export([get_or_set/2]).
 -export([get_or_set/3]).
 
--define(DEFAULT_TTL, 86400).
+-define(DEFAULT_TTL, orc:env(<<"cache_ttl">>, 86400)).
 
 set(Key, Value) ->
     set(Key, Value, ?DEFAULT_TTL).
