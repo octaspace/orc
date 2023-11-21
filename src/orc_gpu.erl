@@ -10,7 +10,7 @@ info(nvidia) ->
     Args = "--query-gpu=index,name,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,display_mode,display_active,fan.speed,power.limit --format=csv,nounits,noheader",
     gpu_info(lookup_nvidia_smi() ++ " " ++ Args, nvidia);
 
-info(amd) -> gpu_info("clinfo --json", amd).
+info(amd) -> gpu_info("./clinfo " ++ "--json", amd).
 
 cuda_version() ->
     case orc_shell:exec("./cuda-version") of
