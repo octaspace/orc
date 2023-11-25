@@ -27,8 +27,7 @@ handle_request(<<"GET">>, info, _Body, Req) ->
         gpu              => gpu_info(),
         cuda_version     => orc:env(cuda_version),
         memory           => memory_usage(),
-        disk             => disk_usage(),
-        location         => maps:get(data, orc_ident:fetch())
+        disk             => disk_usage()
     },
     {200, Response, Req};
 
